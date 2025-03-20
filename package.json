@@ -1,0 +1,25 @@
+{
+  "name": "vue3-minic",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node scripts/dev.js reactivity -f esm"
+  },
+  "keywords": [],
+  "author": "",
+  "type": "module",
+  "license": "ISC",
+  "dependencies": {
+    "vue": "^3.5.13"
+  },
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "esbuild": "^0.25.1",
+    "minimist": "^1.2.8",
+    "typescript": "^5.8.2"
+  }
+}

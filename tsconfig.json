@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2016",
+    "lib": ["esnext", "dom"],
+    "jsx": "preserve",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    // "outDir": "dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": false,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@vue/*": ["packages/*/src"]
+    },
+  }
+}
