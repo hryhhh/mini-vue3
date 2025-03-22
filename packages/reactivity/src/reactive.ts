@@ -1,5 +1,7 @@
 import { isObject } from "@vue/shared";
-import { mutableHandlers, ReactiveFlags } from "./baseHandler";
+import { mutableHandlers} from "./baseHandler";
+import { ReactiveFlags } from "./constants";
+
 const reactiveMap = new WeakMap(); //存储已经创建的代理对象
 
 //检查target类型，响应式状态以及是否存在代理

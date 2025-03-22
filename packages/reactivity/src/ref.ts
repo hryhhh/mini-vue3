@@ -28,7 +28,7 @@ class RefImpl {
     }
   }
 }
-function trackRefValue(ref) {
+export function trackRefValue(ref) {
   if (activeEffect) {
     trackEffects(
       activeEffect,
@@ -80,10 +80,9 @@ export function proxyRefs(objectWithRef) {
       if (oldValue.__v_isRef) {
         oldValue.value = value;
         return true;
-      } else {  
+      } else {
         return Reflect.set(target, key, value, receiver);
       }
-    }
-
-  })
+    },
+  });
 }

@@ -1,3 +1,5 @@
+import { DirtyLevels } from "./constants";
+
 export function effect(fn: Function) {
   const _effect = new ReactiveEffect(fn, () => {
     _effect.run(); //若调度器函数被调用，它会再次调用run方法
@@ -37,12 +39,20 @@ export class ReactiveEffect {
   deps = []; //存储副作用依赖集合
   _depsLength = 0; //存储依赖集合的长度
   _running = 0; //记录当前effect是否正在运行
+  _dirtyLevel = DirtyLevels.Dirty; //脏值标识
 
   public active = true; //指示该副作用是否处于激活状态
 
   constructor(public fn, public scheduler?: () => void) {}
 
+  public get dirty() {
+    return this._dirtyLevel === DirtyLevels.Dirty;
+  }
+  public set dirty(value) {
+    this._dirtyLevel = value ? DirtyLevels.Dirty : DirtyLevels.NoDirty;
+  }
   run() {
+    this._dirtyLevel = DirtyLevels.NoDirty; //每次运行后effect为NoDirty
     // console.log("Running effect");
     if (!this.active) {
       return this.fn();
@@ -66,9 +76,13 @@ export class ReactiveEffect {
 }
 //清理副作用与特定依赖之间的关系
 function cleanDepEffect(dep, effect) {
-  dep.delete(effect);
+  if (dep) {
+    dep.delete(effect);
+  }
   // 从副作用的依赖数组中清理旧依赖
-  effect.deps[effect._depsLength--] = undefined;
+  if (effect._depsLength > 0) {
+    effect.deps[effect._depsLength--] = undefined;
+  }
 }
 export function trackEffects(effect, dep) {
   if (dep.get(effect) !== effect._trackId) {
@@ -88,6 +102,10 @@ export function trackEffects(effect, dep) {
 
 export function triggerEffects(dep) {
   for (const effect of dep.keys()) {
+    //当前值不脏，但是触发更新需要将值变为脏值
+    if (effect._dirtyLevel < DirtyLevels.Dirty) {
+      effect._dirtyLevel = DirtyLevels.NoDirty;
+    }
     if (!effect._running) {
       if (effect.scheduler) {
         effect.scheduler(); //调用调度器，重新运行副作用
