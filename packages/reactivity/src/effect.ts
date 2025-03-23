@@ -71,7 +71,11 @@ export class ReactiveEffect {
     }
   }
   stop() {
-    this.active = false;
+    if(this.active){
+      preCleanEffect(this);
+      postCleanEffect(this);
+      this.active = false;
+    }
   }
 }
 //清理副作用与特定依赖之间的关系
