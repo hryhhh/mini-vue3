@@ -3,7 +3,6 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
 import esbuild from "esbuild";
-import { log } from "console";
 
 //node中的命令行参数通过process.argv获取
 const args = minimist(process.argv.slice(2))
