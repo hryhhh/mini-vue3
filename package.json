@@ -10,10 +10,6 @@
   "author": "",
   "type": "module",
   "license": "ISC",
-  "dependencies": {
-    "@vue/reactivity": "^3.5.13",
-    "vue": "^3.5.13"
-  },
   "private": true,
   "workspaces": [
     "packages/*"
@@ -22,5 +18,10 @@
     "esbuild": "^0.25.1",
     "minimist": "^1.2.8",
     "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@vue/reactivity": "^3.5.13",
+    "@vue/shared": "3.5.13",
+    "vue": "^3.5.13"
   }
 }

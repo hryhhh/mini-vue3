@@ -11,6 +11,9 @@ importers:
       '@vue/reactivity':
         specifier: ^3.5.13
         version: 3.5.13
+      '@vue/shared':
+        specifier: 3.5.13
+        version: 3.5.13
       vue:
         specifier: ^3.5.13
         version: 3.5.13(typescript@5.8.2)
@@ -30,6 +33,15 @@ importers:
       '@vue/shared':
         specifier: workspace:^
         version: link:../shared
+
+  packages/runtime-core:
+    dependencies:
+      '@vue/reactivity':
+        specifier: ^3.5.13
+        version: 3.5.13
+      '@vue/shared':
+        specifier: ^3.5.13
+        version: 3.5.13
 
   packages/runtime-dom:
     dependencies:
@@ -264,8 +276,8 @@ packages:
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
-  nanoid@3.3.9:
-    resolution: {integrity: sha512-SppoicMGpZvbF1l3z4x7No3OlIjP7QJvC9XR7AhZr1kL133KHnKPztkKDc+Ir4aJ/1VhTySrtKhrsycmrMQfvg==}
+  nanoid@3.3.11:
+    resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
@@ -479,13 +491,13 @@ snapshots:
 
   minimist@1.2.8: {}
 
-  nanoid@3.3.9: {}
+  nanoid@3.3.11: {}
 
   picocolors@1.1.1: {}
 
   postcss@8.5.3:
     dependencies:
-      nanoid: 3.3.9
+      nanoid: 3.3.11
       picocolors: 1.1.1
       source-map-js: 1.2.1
 

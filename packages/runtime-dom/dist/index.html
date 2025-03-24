@@ -13,41 +13,26 @@
         render,
         h,
       } from "/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-browser.js";
+      import { renderOptions } from "./runtime-dom.js";
 
-      //   console.log(createRenderer, render, h);
+      // console.log(createRenderer, render, h);
       let app = document.getElementById("app");
 
       let el = h(
         "div",
         {
-          style: {
-            color: "red",
+          style: { color: "red" },
+          class: "demo",
+          onClick: () => {
+            console.log("click");
           },
+          a: 23,
         },
         "hello world"
       );
-      //   console.log(el);
+      // console.log(el);
 
-      const renderer = createRenderer({
-        createElement(type) {
-          return document.createElement(type);
-        },
-        setElementText(el, text) {
-          el.textContent = text;
-        },
-        insert(el, container) {
-          container.appendChild(el);
-        },
-        patchProp(el, key, prevValue, nextValue) {
-          if (key === "style") {
-            for (const styleName in nextValue) {
-              el.style[styleName] = nextValue[styleName];
-            }
-          } else {
-            el.setAttribute(key, nextValue);
-          }
-        },
-      });
+      let renderer = createRenderer(renderOptions);
 
       renderer.render(el, app);
     </script>
