@@ -1,15 +1,17 @@
-
-export function patchStyle(el, prevValue, nextValue) {
-  let style = el.style;
-
-  for (let key in nextValue) {
-    style[key] = nextValue[key];
-  }
-  if (prevValue) {
-    for (let key in prevValue) {
-      if (!nextValue[key]) {
-        style[key] = null;
-      }
+export function patchStyle(el, prev, next) {
+    const style = el.style;
+    if (!next) {
+        el.removeAttribute('style');
+    } else {
+        if (prev) {
+            for (const key in prev) {
+                if (!next[key]) {
+                    style[key] = '';
+                }
+            }
+        }
+        for (const key in next) {
+            style[key] = next[key];
+        }
     }
-  }
 }

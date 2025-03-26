@@ -8,33 +8,25 @@
   <body>
     <div id="app"></div>
     <script type="module">
-      import {
-        createRenderer,
-        render,
-        h,
-      } from "/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-browser.js";
-      import { renderOptions } from "./runtime-dom.js";
+      // import {
+      //  createRenderer,
+      //  render,
+      //  h,
+      // } from "/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-browser.js";
+      import { render, h, createVnode } from "./runtime-dom.js";
 
       // console.log(createRenderer, render, h);
       let app = document.getElementById("app");
 
-      let el = h(
+      let ele = h(
         "div",
-        {
-          style: { color: "red" },
-          class: "demo",
-          onClick: () => {
-            console.log("click");
-          },
-          a: 23,
-        },
-        "hello world"
+        { id: "app", class: "red" },
+        h("p", { style: { color: "red" } }, "hello"),
+        h("p", { class: "green" }, "world"),
+        createVnode("p", { style: { color: "blue" } }, "blue")
       );
       // console.log(el);
-
-      let renderer = createRenderer(renderOptions);
-
-      renderer.render(el, app);
+      render(ele, app);
     </script>
   </body>
 </html>
