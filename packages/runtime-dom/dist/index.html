@@ -18,15 +18,16 @@
       // console.log(createRenderer, render, h);
       let app = document.getElementById("app");
 
-      let ele = h(
-        "div",
-        { id: "app", class: "red" },
-        h("p", { style: { color: "red" } }, "hello"),
-        h("p", { class: "green" }, "world"),
-        createVnode("p", { style: { color: "blue" } }, "blue")
-      );
+      let el = h("div", { style:{color:"green"} }, "hello");
+      let ele = h("div", { style:{color:"red"} }, [h("div", "hello"), h("div", "world")]);
       // console.log(el);
-      render(ele, app);
+      render(el, app);
+
+      setTimeout(() => {
+        console.log("hello world");
+        
+        render(ele, app);   
+      },1000)
     </script>
   </body>
 </html>

@@ -1,5 +1,8 @@
 import { ShapeFlags, isString } from "@vue/shared";
 
+export function isSameVnode(n1, n2) {
+  return n1.type === n2.type && n1.key === n2.key;
+}
 //创建虚拟节点对象
 export function createVnode(type, props, children) {
   const shapeFlag = isString(type) ? ShapeFlags.ELEMENT : 0;
