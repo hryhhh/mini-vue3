@@ -19,7 +19,15 @@
       let app = document.getElementById("app");
 
       let el = h("div", { style:{color:"green"} }, "hello");
-      let ele = h("div", { style:{color:"red"} }, [h("div", "hello"), h("div", "world")]);
+      let ele = h('div',[
+        h('div',{key:'a'}, "hello"),
+        h('div',{key:'b'}, "world"),
+        h('div',{key:'c',style:{color:"red"}}, "c"),
+        h('div',{key:'d'}, "d"),
+        h('div',{key:'e'}, "e"),
+        h('div',{key:'f'}, "f"),
+      ])
+       
       // console.log(el);
       render(el, app);
 

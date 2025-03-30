@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+      //   import {
+      //    createRenderer,
+      //    render,
+      //    Text,
+      //    h,
+      //   } from "/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-browser.js";
+      import { render, h, Text,Fragment } from "./runtime-dom.js";
+
+      // console.log(createRenderer, render, h);
+      let app = document.getElementById("app");
+
+      render(h(Text, "hello"), app);
+      render(
+        h(Fragment, [
+          h("div", { key: "a" }, "hello"),
+          h("div", { key: "b" }, "world"),
+        ]),
+        app
+      );
+
+      setTimeout(() => {
+        console.log("hello world");
+
+        render(
+          null,
+          app
+        );
+      }, 1000);
+    </script>
+  </body>
+</html>

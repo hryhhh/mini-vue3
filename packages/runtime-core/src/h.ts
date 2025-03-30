@@ -8,6 +8,7 @@ import { isObject } from "@vue/shared";
 export function h(type, propsOrChildren?, children?) {
   let l = arguments.length;
   if (l === 2) {
+    //两个参数的情况
     if (isObject(propsOrChildren) && !Array.isArray(propsOrChildren)) {
       if (isVnode(propsOrChildren)) {
         //h('div',h('p'))嵌套虚拟节点

@@ -1,5 +1,8 @@
 import { ShapeFlags, isString } from "@vue/shared";
 
+export const Text = Symbol("text");
+export const Fragment = Symbol("fragment");
+
 export function isSameVnode(n1, n2) {
   return n1.type === n2.type && n1.key === n2.key;
 }

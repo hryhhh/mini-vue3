@@ -1,5 +1,6 @@
 import { ShapeFlags } from "@vue/shared";
-import { isSameVnode } from "./createVnode";
+import { Fragment, Text, isSameVnode } from "./createVnode";
+import getSequence from "../seq";
 
 //创建一个渲染器，用于将虚拟 DOM 节点渲染到真实 DOM 容器中
 export function createRenderer(renderOptions) {
@@ -21,7 +22,7 @@ export function createRenderer(renderOptions) {
     }
   };
   //将虚拟节点vnode挂载到 DOM 中
-  const mountElement = (vnode, container,anchor) => {
+  const mountElement = (vnode, container, anchor) => {
     const { type, props, children, shapeFlag } = vnode;
 
     // console.log(type, props, children);
@@ -42,9 +43,10 @@ export function createRenderer(renderOptions) {
 
     hostInsert(el, container, anchor); //将真实 DOM 元素插入到容器中
   };
+ 
 
   //根据旧虚拟节点是否存在，决定挂载新元素还是更新现有元素
-  const processElement = (n1, n2, container, anchor=null) => {
+  const processElement = (n1, n2, container, anchor = null) => {
     //初始化操作：n1不存在，n2存在，挂载n2
     if (n1 == null) {
       mountElement(n2, container, anchor); //挂载新元素
@@ -70,12 +72,13 @@ export function createRenderer(renderOptions) {
     }
   };
 
-  //
+  //全量diff（递归diff 性能差）
   const patchKeyedChildren = (c1, c2, el) => {
     let i = 0;
     let e1 = c1.length - 1; //c1数组的尾部索引
     let e2 = c2.length - 1; //c2数组的尾部索引
 
+    //从头部比较
     while (i <= e1 && i <= e2) {
       const n1 = c1[i];
       const n2 = c2[i];
@@ -87,6 +90,7 @@ export function createRenderer(renderOptions) {
       i++;
     }
 
+    //从尾部比较
     while (i <= e1 && i <= e2) {
       const n1 = c1[e1];
       const n2 = c2[e2];
@@ -99,13 +103,12 @@ export function createRenderer(renderOptions) {
       e2--;
     }
 
-    //处理新增节点
+    //特殊插入和删除：处理新节点比旧节点多或少的情况
     if (i > e1) {
-      //说明新的比老的多
       if (i <= e2) {
         //有插入的部分
-        let nextPos = e2 + 1;
-        let anchor = c2[nextPos]?.el;
+        let nextPos = e2 + 1; //新节点数组中最后一个节点的下一个位置
+        let anchor = c2[nextPos]?.el; //插入新节点的参考位置
 
         while (i <= e2) {
           patch(null, c2[i], el, anchor);
@@ -116,7 +119,7 @@ export function createRenderer(renderOptions) {
       //处理移除节点
       if (i <= e1) {
         while (i <= e1) {
-          unmountChildren(c1[i]);
+          unmount(c1[i]);
           i++;
         }
       }
@@ -124,12 +127,20 @@ export function createRenderer(renderOptions) {
     //乱序的情况
     let s1 = i;
     let s2 = i;
-    const keyToNewIndexMap = new Map();
+
+    const keyToNewIndexMap = new Map(); //记录新节点的位置
+    let toBePatched = e2 - s2 + 1; //新数组中未处理的节点数量
+
+    //记录新节点在旧节点数组 c1 中的对应位置
+    let newIndexToOldIndexMap = new Array(toBePatched).fill(0);
+
+    //构建新节点的映射表
     for (let i = s2; i <= e2; i++) {
       const vnode = c2[i];
       keyToNewIndexMap.set(vnode.key, i); //key:index
     }
 
+    //遍历旧节点数组 c1 中未处理的部分
     for (let i = s1; i <= e1; i++) {
       const vnode = c1[i];
       const newIndex = keyToNewIndexMap.get(vnode.key); //新的位置;
@@ -137,22 +148,32 @@ export function createRenderer(renderOptions) {
       if (newIndex === undefined) {
         unmount(vnode);
       } else {
-        patch(vnode, c2[newIndex], el);
+        // 存在，说明该旧节点可以复用
+        newIndexToOldIndexMap[newIndex - s2] = i + 1;
+        patch(vnode, c2[newIndex], el); //复用
       }
     }
-    //调整顺序
-    let toBePatched = e2 - s2 + 1; //新数组中未处理的节点数量
+    //调整顺序 最长递增子序列：寻找不需要移动的节点，减少 DOM 操作
+    let increaseingSeq = getSequence(newIndexToOldIndexMap);
+
+    let j = increaseingSeq.length - 1;
+
+    //倒序遍历新节点
     for (let i = toBePatched - 1; i >= 0; i--) {
-      let nextIndex = s2 + i;
+      let nextIndex = s2 + i; //当前节点在新数组中的索引
       let vnode = c2[nextIndex];
       let anchor = nextIndex + 1 < c2.length ? c2[nextIndex + 1].el : null;
       if (!vnode.el) {
-        patch(null, vnode, el, anchor); //创建h插入
+        patch(null, vnode, el, anchor); //创建并插入
       } else {
-        hostInsert(vnode.el, el, anchor);
-      } //接着倒序插入
+        if (i === increaseingSeq[j]) {
+          j--; //做了diff算法的优化
+        } else {
+          hostInsert(vnode.el, el, anchor); //接着倒序插入
+        }
+      }
     }
-  }
+  };
   const patchChildren = (n1, n2, el) => {
     //text, array, null
     const c1 = n1.children;
@@ -182,6 +203,7 @@ export function createRenderer(renderOptions) {
       if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
         //新子节点也是数组，diff算法
         if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+          patchKeyedChildren(c1, c2, el);
         } else {
           //新子节点不是数组，直接删除旧子节点
           unmountChildren(c1);
@@ -209,8 +231,29 @@ export function createRenderer(renderOptions) {
     patchProps(oldProps, newProps, el); //更新属性
     patchChildren(n1, n2, el); //更新子节点
   };
+
+  //处理文本节点的挂载或更新
+  const processText = (n1, n2, container) => {
+    if (n1 == null) {
+      hostInsert((n2.el = hostCreateText(n2.children, container)), container);
+    } else {
+      const el = (n2.el = n1.el);
+      if (n1.children !== n2.children) {
+        hostSetText(el, n2.children);
+      }
+    }
+  };
+
+  //处理 Fragment 节点的挂载或更新
+  const processFragment = (n1, n2, container) => {
+    if (n1 === null) {
+      mountChildren(n2.children, container);
+    } else {
+      patchChildren(n1, n2, container);
+    }
+  };
   //diff比较新旧虚拟节点,根据情况更新 DOM
-  const patch = (n1, n2, container,anchor=null) => {
+  const patch = (n1, n2, container, anchor = null) => {
     if (n1 === n2) {
       return;
     }
@@ -219,21 +262,37 @@ export function createRenderer(renderOptions) {
       unmount(n1);
       n1 = null; //卸载n1，接着执行后面n2的初始化
     }
-    processElement(n1, n2, container, anchor); //处理元素的挂载或更新
+
+    const { type } = n2;
+    switch (type) {
+      case Text:
+        processText(n1, n2, container);
+        break;
+      case Fragment:
+        processFragment(n1, n2, container);
+        break;
+      default:
+        processElement(n1, n2, container, anchor); //处理元素的挂载或更新
+    }
   };
 
-  const unmount = (vnode) => hostRemove(vnode.el);
+  const unmount = (vnode) => {
+    if (vnode.type === Fragment) {
+      unmountChildren(vnode.children);
+    } else {
+      hostRemove(vnode.el);
+    }
+  };
   //虚拟节点 vnode 渲染到真实的 DOM 容器 container 中
   const render = (vnode, container) => {
     if (vnode == null) {
       if (container._vnode) {
-        // console.log(container._vnode);
         unmount(container._vnode);
       }
+    } else {
+      patch(container._vnode || null, vnode, container);
+      container._vnode = vnode;
     }
-    patch(container._vnode || null, vnode, container);
-
-    container._vnode = vnode;
   };
   return {
     render,
